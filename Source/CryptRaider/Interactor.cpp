@@ -48,25 +48,17 @@ bool UInteractor::TryInteract()
 		AActor* Actor = Hit.GetActor();
 		UE_LOG(LogTemp, Display, TEXT("Hit: %s"), *Actor->GetName());
 
-		TSet<UActorComponent*> Components = Actor->GetComponents();
-		for (UActorComponent* Component : Components)
+		IInteractable* Interactable = Actor->FindComponentByInterface<IInteractable>();
+		if (Interactable && Interactable->IsInteractable())
 		{
-			if (Component->Implements<UInteractable>())
-			{
-				IInteractable* Interactable = Cast<IInteractable>(Component);
-				if (Interactable && Interactable->IsInteractable())
-				{
-					UE_LOG(
-					LogTemp,
-					Display,
-					TEXT("%s has an IInteractable component %s. Interacting with prompt: %s"),
-					*Actor->GetName(),
-					*Component->GetName(),
-					*Interactable->GetInteractionPrompt());
+			UE_LOG(
+			LogTemp,
+			Display,
+			TEXT("%s has an IInteractable component. Interacting with prompt: %s"),
+			*Actor->GetName(),
+			*Interactable->GetInteractionPrompt());
 
-					Interactable->TryInteract();
-				}
-			}
+			Interactable->TryInteract();
 		}
 	}
 	else
