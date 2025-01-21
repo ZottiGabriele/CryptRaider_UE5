@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Interactable.h"
 #include "Components/StaticMeshComponent.h"
 #include "Delegates/DelegateSignatureImpl.inl"
 #include "Components/ActorComponent.h"
@@ -19,7 +20,7 @@ enum class DoorState : uint8
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class CRYPTRAIDER_API UDoorInteractionComponent : public UActorComponent
+class CRYPTRAIDER_API UDoorInteractionComponent : public UActorComponent, public IInteractable
 {
 	GENERATED_BODY()
 
@@ -32,20 +33,26 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UStaticMeshComponent* rightHingeDoor;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "References")
+	UStaticMeshComponent* RightHingeDoor;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UStaticMeshComponent* leftHingeDoor;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "References")
+	UStaticMeshComponent* LeftHingeDoor;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FRotator leftHingeDoorOpenRotation;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setup")
+	FRotator LeftHingeDoorOpenRotation;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FRotator rightHingeDoorOpenRotation;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setup")
+	FRotator RightHingeDoorOpenRotation;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float openSpeed;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setup")
+	float OpenSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setup")
+	FString OpenInteractionPrompt;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setup")
+	FString CloseInteractionPrompt;
 
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -59,9 +66,15 @@ public:
 	UFUNCTION(BlueprintCallable)
 	DoorState GetCurrentState() const;
 
+	virtual bool TryInteract() override;
+	virtual bool IsInteractable() override;
+	virtual FString GetInteractionPrompt() override;
+
 private:
-	FRotator startLeftDoorRotation;
-	FRotator startRightDoorRotation;
-	DoorState currentState = DoorState::Closed;
-	float interactionTime = 0;
+	FRotator StartLeftDoorRotation;
+	FRotator StartRightDoorRotation;
+	DoorState CurrentState = DoorState::Closed;
+	float InteractionTime = 0;
+
+	bool TryGetDoorRotation(UStaticMeshComponent* Door, FRotator& CurrentDoorRotation);
 };
