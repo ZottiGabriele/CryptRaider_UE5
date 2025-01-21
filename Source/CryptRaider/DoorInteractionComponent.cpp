@@ -96,7 +96,7 @@ DoorState UDoorInteractionComponent::GetCurrentState() const
     return CurrentState;
 }
 
-bool UDoorInteractionComponent::TryInteract()
+bool UDoorInteractionComponent::TryInteract(UInteractor& Interactor)
 {
 	switch (CurrentState)
 	{

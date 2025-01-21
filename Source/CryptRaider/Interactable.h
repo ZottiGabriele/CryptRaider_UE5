@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Interactor.h"
 #include "UObject/Interface.h"
 #include "Interactable.generated.h"
 
@@ -22,7 +23,7 @@ class CRYPTRAIDER_API IInteractable
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual bool TryInteract() = 0;
+	virtual bool TryInteract(UInteractor& Interactor) = 0;
 	virtual bool IsInteractable() = 0;
 	virtual FString GetInteractionPrompt() = 0;
 };

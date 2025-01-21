@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Interactable.h"
 #include "Components/ActorComponent.h"
+#include "PhysicsEngine/PhysicsHandleComponent.h"
 #include "PickupInteractionComponent.generated.h"
 
 
@@ -25,7 +26,12 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	virtual bool TryInteract() override;
+	virtual bool TryInteract(UInteractor& Interactor) override;
 	virtual bool IsInteractable() override;
 	virtual FString GetInteractionPrompt() override;
+
+private:
+	UPrimitiveComponent* Primitive;
+	UInteractor* CachedInteractor;
+	UPhysicsHandleComponent* Handler;
 };

@@ -27,9 +27,14 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool TryInteract();
 
+	UPROPERTY(EditAnywhere)
+	float HoldDistance = 120;
+
+	FVector InteractionLocation;
+
 private:
 	UPROPERTY(EditAnywhere)
-	float MaxGrabDistance = 150;
+	float MaxInteractDistance = 150;
 
 	UPROPERTY(EditAnywhere)
 	float InteractRadius = 25;

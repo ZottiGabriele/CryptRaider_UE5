@@ -66,7 +66,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	DoorState GetCurrentState() const;
 
-	virtual bool TryInteract() override;
+	virtual bool TryInteract(UInteractor& Interactor) override;
 	virtual bool IsInteractable() override;
 	virtual FString GetInteractionPrompt() override;
 

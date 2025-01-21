@@ -3,6 +3,8 @@
 
 #include "PickupInteractionComponent.h"
 
+#include "Materials/MaterialExpressionLocalPosition.h"
+
 // Sets default values for this component's properties
 UPickupInteractionComponent::UPickupInteractionComponent()
 {
@@ -16,6 +18,7 @@ UPickupInteractionComponent::UPickupInteractionComponent()
 void UPickupInteractionComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	Primitive = GetOwner()->FindComponentByClass<UPrimitiveComponent>();
 }
 
 
@@ -23,12 +26,37 @@ void UPickupInteractionComponent::BeginPlay()
 void UPickupInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (Handler != nullptr && Primitive != nullptr && CachedInteractor != nullptr)
+	{
+		FVector TargetLocation = CachedInteractor->GetComponentLocation() + CachedInteractor->GetForwardVector() * CachedInteractor->HoldDistance;
+		Handler->SetTargetLocationAndRotation(TargetLocation, CachedInteractor->GetComponentRotation());
+	}
 }
 
-bool UPickupInteractionComponent::TryInteract()
+bool UPickupInteractionComponent::TryInteract(UInteractor& Interactor)
 {
-	UE_LOG(LogTemp, Display, TEXT("Pick me up!"));
-	return true;
+	this->CachedInteractor = &Interactor;
+
+	AActor* Owner = Interactor.GetOwner();
+	Handler = Owner->FindComponentByClass<UPhysicsHandleComponent>();
+
+	if (Handler != nullptr && Primitive != nullptr)
+	{
+		if (Handler->GetGrabbedComponent() == Primitive)
+		{
+			UE_LOG(LogTemp, Display, TEXT("Release %s!"), *Primitive -> GetName());
+			Handler->ReleaseComponent();
+			return false;
+		}
+		
+		UE_LOG(LogTemp, Display, TEXT("Pick %s up!"), *Primitive -> GetName());
+		
+		Handler->GrabComponentAtLocationWithRotation(Primitive, NAME_None, Interactor.InteractionLocation, Interactor.GetComponentRotation());
+		return true;
+	}
+	
+	return false;
 }
 
 bool UPickupInteractionComponent::IsInteractable()

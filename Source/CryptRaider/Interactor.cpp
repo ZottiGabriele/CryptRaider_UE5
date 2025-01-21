@@ -12,8 +12,6 @@ UInteractor::UInteractor()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
 }
 
 
@@ -21,8 +19,6 @@ UInteractor::UInteractor()
 void UInteractor::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// ...
 }
 
 
@@ -35,7 +31,7 @@ void UInteractor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComp
 bool UInteractor::TryInteract()
 {
 	FVector LineStart = GetComponentLocation();
-	FVector LineEnd = LineStart + GetForwardVector() * MaxGrabDistance;
+	FVector LineEnd = LineStart + GetForwardVector() * MaxInteractDistance;
 	
 	DrawDebugLine(GetWorld(), LineStart, LineEnd, FColor::Red);
 
@@ -58,7 +54,8 @@ bool UInteractor::TryInteract()
 			*Actor->GetName(),
 			*Interactable->GetInteractionPrompt());
 
-			Interactable->TryInteract();
+			InteractionLocation = Hit.ImpactPoint;
+			Interactable->TryInteract(*this);
 		}
 	}
 	else
