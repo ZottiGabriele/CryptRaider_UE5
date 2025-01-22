@@ -3,8 +3,6 @@
 
 #include "PickupInteractionComponent.h"
 
-#include "Materials/MaterialExpressionLocalPosition.h"
-
 // Sets default values for this component's properties
 UPickupInteractionComponent::UPickupInteractionComponent()
 {
@@ -19,8 +17,15 @@ void UPickupInteractionComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	Primitive = GetOwner()->FindComponentByClass<UPrimitiveComponent>();
-}
+	
+	TArray<UStaticMeshComponent*> MeshComponents;
+	GetOwner()->GetComponents(MeshComponents);
 
+	for (auto MeshComponent : MeshComponents)
+	{
+		CollisionMap[MeshComponent] = MeshComponent->GetCollisionResponseToChannel(ECC_Pawn);
+	}
+}
 
 // Called every frame
 void UPickupInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -29,7 +34,7 @@ void UPickupInteractionComponent::TickComponent(float DeltaTime, ELevelTick Tick
 
 	if (Handler != nullptr && Primitive != nullptr && CachedInteractor != nullptr)
 	{
-		FVector TargetLocation = CachedInteractor->GetComponentLocation() + CachedInteractor->GetForwardVector() * CachedInteractor->HoldDistance;
+		FVector TargetLocation = CachedInteractor->GetComponentLocation() + CachedInteractor->GetForwardVector() * CachedInteractor->GetHoldDistance();
 		Handler->SetTargetLocationAndRotation(TargetLocation, CachedInteractor->GetComponentRotation());
 	}
 }
@@ -47,24 +52,41 @@ bool UPickupInteractionComponent::TryInteract(UInteractor& Interactor)
 		{
 			UE_LOG(LogTemp, Display, TEXT("Release %s!"), *Primitive -> GetName());
 			Handler->ReleaseComponent();
+
+			for (auto CollisionCache : CollisionMap)
+			{
+				UE_LOG(LogTemp, Display, TEXT("Setting %s collision to %d"), *CollisionCache.first->GetName(), CollisionCache.second);
+				
+				CollisionCache.first->SetCollisionResponseToChannel(ECC_Pawn, CollisionCache.second);
+				CollisionCache.first->UpdateCollisionProfile();
+			}
+			
 			return false;
 		}
 		
+		for (auto CollisionCache : CollisionMap)
+		{
+			UE_LOG(LogTemp, Display, TEXT("Setting %s collision to %d (ignore)"), *CollisionCache.first->GetName(), ECR_Ignore);
+			CollisionCache.first->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+			CollisionCache.first->UpdateCollisionProfile();
+		}
+
 		UE_LOG(LogTemp, Display, TEXT("Pick %s up!"), *Primitive -> GetName());
+		FVector GrabPoint = Primitive->GetComponentLocation() + Primitive->GetComponentRotation().RotateVector(GrabAnchorLocation);
+		Handler->GrabComponentAtLocationWithRotation(Primitive, NAME_None, GrabPoint, Interactor.GetComponentRotation());
 		
-		Handler->GrabComponentAtLocationWithRotation(Primitive, NAME_None, Interactor.InteractionLocation, Interactor.GetComponentRotation());
 		return true;
 	}
 	
 	return false;
 }
 
-bool UPickupInteractionComponent::IsInteractable()
+bool UPickupInteractionComponent::IsInteractable() const
 {
 	return true;
 }
 
-FString UPickupInteractionComponent::GetInteractionPrompt()
+FString UPickupInteractionComponent::GetInteractionPrompt() const
 {
 	return "Pick up";
 }

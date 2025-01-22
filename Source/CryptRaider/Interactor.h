@@ -27,10 +27,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool TryInteract();
 
-	UPROPERTY(EditAnywhere)
-	float HoldDistance = 120;
-
-	FVector InteractionLocation;
+	float GetInteractRadius() const;
+	float GetHoldDistance() const;
+	FVector GetInteractLocation() const;	
 
 private:
 	UPROPERTY(EditAnywhere)
@@ -38,4 +37,12 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float InteractRadius = 25;
+
+	UPROPERTY(EditAnywhere)
+	float HoldDistance = 120;
+
+	UPROPERTY(EditAnywhere)
+	bool bDebugEnabled = false;
+	
+	FVector InteractionLocation;
 };

@@ -16,7 +16,8 @@ enum class DoorState : uint8
 	Closed,
 	Opening,
 	Opened,
-	Closing
+	Closing,
+	Locked
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -67,10 +68,13 @@ public:
 	DoorState GetCurrentState() const;
 
 	virtual bool TryInteract(UInteractor& Interactor) override;
-	virtual bool IsInteractable() override;
-	virtual FString GetInteractionPrompt() override;
+	virtual bool IsInteractable() const override;
+	virtual FString GetInteractionPrompt() const override;
 
 private:
+	UPROPERTY(EditAnywhere, Category = "Setup")
+	DoorState StartingState;
+	
 	FRotator StartLeftDoorRotation;
 	FRotator StartRightDoorRotation;
 	DoorState CurrentState = DoorState::Closed;

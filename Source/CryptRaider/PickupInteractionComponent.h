@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "map"
 #include "CoreMinimal.h"
 #include "Interactable.h"
 #include "Components/ActorComponent.h"
@@ -26,12 +27,16 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	UPROPERTY(EditAnywhere)
+	FVector GrabAnchorLocation;
+	
 	virtual bool TryInteract(UInteractor& Interactor) override;
-	virtual bool IsInteractable() override;
-	virtual FString GetInteractionPrompt() override;
+	virtual bool IsInteractable() const override;
+	virtual FString GetInteractionPrompt() const override;
 
 private:
 	UPrimitiveComponent* Primitive;
+	std::map<UStaticMeshComponent*, ECollisionResponse> CollisionMap;
 	UInteractor* CachedInteractor;
 	UPhysicsHandleComponent* Handler;
 };

@@ -4,6 +4,7 @@
 #include "Interactor.h"
 
 #include "Interactable.h"
+#include "ViewportInteractionTypes.h"
 #include "Engine/World.h"
 
 // Sets default values for this component's properties
@@ -26,14 +27,34 @@ void UInteractor::BeginPlay()
 void UInteractor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	
+	if (bDebugEnabled)
+	{
+		FVector LineStart = GetComponentLocation();
+		FVector LineEnd = LineStart + GetForwardVector() * MaxInteractDistance;
+		
+		FHitResult Hit;
+		FCollisionShape Shape = FCollisionShape::MakeSphere(InteractRadius);
+	
+		bool bIsHitting = GetWorld()->SweepSingleByChannel(Hit, LineStart, LineEnd, FQuat::Identity, ECC_GameTraceChannel2, Shape);
+		if (bIsHitting)
+		{
+			DrawDebugLine(GetWorld(), LineStart, Hit.ImpactPoint, FColor::Red);
+			DrawDebugSphere(GetWorld(), Hit.Location, InteractRadius, 20, FColor::Blue);
+			DrawDebugSphere(GetWorld(), Hit.ImpactPoint, InteractRadius, 20, FColor::Green);
+		}
+		else
+		{
+			DrawDebugLine(GetWorld(), LineStart, LineEnd, FColor::Red);
+			DrawDebugSphere(GetWorld(), LineEnd, InteractRadius, 20, FColor::Red);
+		}
+	}
 }
 
 bool UInteractor::TryInteract()
 {
 	FVector LineStart = GetComponentLocation();
 	FVector LineEnd = LineStart + GetForwardVector() * MaxInteractDistance;
-	
-	DrawDebugLine(GetWorld(), LineStart, LineEnd, FColor::Red);
 
 	FHitResult Hit;
 	FCollisionShape Shape = FCollisionShape::MakeSphere(InteractRadius);
@@ -64,4 +85,19 @@ bool UInteractor::TryInteract()
 	}
 
 	return bIsHitting;
+}
+
+float UInteractor::GetInteractRadius() const
+{
+	return InteractRadius;
+}
+
+float UInteractor::GetHoldDistance() const
+{
+	return HoldDistance;
+}
+
+FVector UInteractor::GetInteractLocation() const
+{
+	return InteractionLocation;
 }

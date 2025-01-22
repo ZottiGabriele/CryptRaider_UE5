@@ -24,6 +24,6 @@ class CRYPTRAIDER_API IInteractable
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	virtual bool TryInteract(UInteractor& Interactor) = 0;
-	virtual bool IsInteractable() = 0;
-	virtual FString GetInteractionPrompt() = 0;
+	virtual bool IsInteractable() const = 0;
+	virtual FString GetInteractionPrompt() const = 0;
 };

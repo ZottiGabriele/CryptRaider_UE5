@@ -19,6 +19,8 @@ void UDoorInteractionComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	CurrentState = StartingState;
+
 	TryGetDoorRotation(LeftHingeDoor, StartLeftDoorRotation);
 	TryGetDoorRotation(RightHingeDoor, StartRightDoorRotation);
 }
@@ -108,18 +110,19 @@ bool UDoorInteractionComponent::TryInteract(UInteractor& Interactor)
 		break;
 	case DoorState::Opening:
 	case DoorState::Closing:
+	case DoorState::Locked:
 		return false;
 	}
 
 	return true;
 }
 
-bool UDoorInteractionComponent::IsInteractable()
+bool UDoorInteractionComponent::IsInteractable() const
 {
 	return CurrentState == DoorState::Opened || CurrentState == DoorState::Closed;
 }
 
-FString UDoorInteractionComponent::GetInteractionPrompt()
+FString UDoorInteractionComponent::GetInteractionPrompt() const
 {
 	if (CurrentState == DoorState::Opened)
 	{
