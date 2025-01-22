@@ -133,6 +133,11 @@ FString UDoorInteractionComponent::GetInteractionPrompt() const
 	{
 		return OpenInteractionPrompt;
 	}
+
+	if (CurrentState == DoorState::Locked)
+	{
+		return LockedInteractionPrompt;
+	}
 	
 	return "";
 }

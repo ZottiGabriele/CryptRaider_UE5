@@ -49,11 +49,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setup")
 	float OpenSpeed;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setup")
-	FString OpenInteractionPrompt;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setup")
-	FString CloseInteractionPrompt;
+	
 
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -72,6 +68,15 @@ public:
 	virtual FString GetInteractionPrompt() const override;
 
 private:
+	UPROPERTY(EditAnywhere, Category = "Setup")
+	FString OpenInteractionPrompt = "Open";
+
+	UPROPERTY(EditAnywhere, Category = "Setup")
+	FString CloseInteractionPrompt = "Close";
+
+	UPROPERTY(EditAnywhere, Category = "Setup")
+	FString LockedInteractionPrompt = "Locked";
+	
 	UPROPERTY(EditAnywhere, Category = "Setup")
 	DoorState StartingState;
 	

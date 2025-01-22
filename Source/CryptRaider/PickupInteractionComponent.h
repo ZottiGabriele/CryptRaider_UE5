@@ -35,6 +35,12 @@ public:
 	virtual FString GetInteractionPrompt() const override;
 
 private:
+	UPROPERTY(EditAnywhere)
+	FString PickUpInteractionPrompt = "Pick Up";
+
+	UPROPERTY(EditAnywhere)
+	FString DropInteractionPrompt = "Drop";
+	
 	UPrimitiveComponent* Primitive;
 	std::map<UStaticMeshComponent*, ECollisionResponse> CollisionMap;
 	UInteractor* CachedInteractor;

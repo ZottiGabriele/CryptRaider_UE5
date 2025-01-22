@@ -27,9 +27,17 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool TryInteract();
 
+	UFUNCTION(BlueprintCallable)
+	bool SweepForInteractables();
+
+	UFUNCTION(BlueprintCallable)
+	FHitResult GetCurrentHit() const;
+
+	UFUNCTION(BlueprintCallable)
+	TScriptInterface<IInteractable> GetLastHitInteractable() const;
+	
 	float GetInteractRadius() const;
 	float GetHoldDistance() const;
-	FVector GetInteractLocation() const;	
 
 private:
 	UPROPERTY(EditAnywhere)
@@ -44,5 +52,6 @@ private:
 	UPROPERTY(EditAnywhere)
 	bool bDebugEnabled = false;
 	
-	FVector InteractionLocation;
+	FHitResult CurrentHit;
+	TScriptInterface<IInteractable> LastHitInteractable;
 };

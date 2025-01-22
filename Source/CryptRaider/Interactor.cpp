@@ -2,9 +2,7 @@
 
 
 #include "Interactor.h"
-
 #include "Interactable.h"
-#include "ViewportInteractionTypes.h"
 #include "Engine/World.h"
 
 // Sets default values for this component's properties
@@ -23,49 +21,58 @@ void UInteractor::BeginPlay()
 }
 
 
-// Called every frame
-void UInteractor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+bool UInteractor::SweepForInteractables()
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	FVector LineStart = GetComponentLocation();
+	FVector LineEnd = LineStart + GetForwardVector() * MaxInteractDistance;
 	
-	if (bDebugEnabled)
+	FCollisionShape Shape = FCollisionShape::MakeSphere(InteractRadius);
+
+	bool bIsHitting = GetWorld()->SweepSingleByChannel(CurrentHit, LineStart, LineEnd, FQuat::Identity, ECC_GameTraceChannel2, Shape);
+	if (bIsHitting)
 	{
-		FVector LineStart = GetComponentLocation();
-		FVector LineEnd = LineStart + GetForwardVector() * MaxInteractDistance;
-		
-		FHitResult Hit;
-		FCollisionShape Shape = FCollisionShape::MakeSphere(InteractRadius);
-	
-		bool bIsHitting = GetWorld()->SweepSingleByChannel(Hit, LineStart, LineEnd, FQuat::Identity, ECC_GameTraceChannel2, Shape);
-		if (bIsHitting)
+		AActor* Actor = CurrentHit.GetActor();
+		UActorComponent* InteractableComponent = Actor->FindComponentByInterface(UInteractable::StaticClass());
+		if (InteractableComponent)
 		{
-			DrawDebugLine(GetWorld(), LineStart, Hit.ImpactPoint, FColor::Red);
-			DrawDebugSphere(GetWorld(), Hit.Location, InteractRadius, 20, FColor::Blue);
-			DrawDebugSphere(GetWorld(), Hit.ImpactPoint, InteractRadius, 20, FColor::Green);
+			IInteractable* Interactable = Cast<IInteractable>(InteractableComponent);
+			LastHitInteractable.SetInterface(Interactable);
+			LastHitInteractable.SetObject(InteractableComponent);
 		}
-		else
+		
+		if (bDebugEnabled)
+		{
+			DrawDebugLine(GetWorld(), LineStart, CurrentHit.ImpactPoint, FColor::Red);
+			DrawDebugSphere(GetWorld(), CurrentHit.Location, InteractRadius, 20, FColor::Blue);
+			DrawDebugSphere(GetWorld(), CurrentHit.ImpactPoint, InteractRadius, 20, FColor::Green);
+		}
+	}
+	else
+	{
+		if (bDebugEnabled)
 		{
 			DrawDebugLine(GetWorld(), LineStart, LineEnd, FColor::Red);
 			DrawDebugSphere(GetWorld(), LineEnd, InteractRadius, 20, FColor::Red);
 		}
 	}
+	
+	return bIsHitting;
+}
+
+// Called every frame
+void UInteractor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
 bool UInteractor::TryInteract()
 {
-	FVector LineStart = GetComponentLocation();
-	FVector LineEnd = LineStart + GetForwardVector() * MaxInteractDistance;
-
-	FHitResult Hit;
-	FCollisionShape Shape = FCollisionShape::MakeSphere(InteractRadius);
-	
-	bool bIsHitting = GetWorld()->SweepSingleByChannel(Hit, LineStart, LineEnd, FQuat::Identity, ECC_GameTraceChannel2, Shape);
-	if (bIsHitting)
+	if (CurrentHit.bBlockingHit)
 	{
-		AActor* Actor = Hit.GetActor();
+		AActor* Actor = CurrentHit.GetActor();
 		UE_LOG(LogTemp, Display, TEXT("Hit: %s"), *Actor->GetName());
 
-		IInteractable* Interactable = Actor->FindComponentByInterface<IInteractable>();
+		IInteractable* Interactable = LastHitInteractable.GetInterface();
 		if (Interactable && Interactable->IsInteractable())
 		{
 			UE_LOG(
@@ -74,8 +81,7 @@ bool UInteractor::TryInteract()
 			TEXT("%s has an IInteractable component. Interacting with prompt: %s"),
 			*Actor->GetName(),
 			*Interactable->GetInteractionPrompt());
-
-			InteractionLocation = Hit.ImpactPoint;
+			
 			Interactable->TryInteract(*this);
 		}
 	}
@@ -84,7 +90,7 @@ bool UInteractor::TryInteract()
 		UE_LOG(LogTemp, Display, TEXT("No Hit"));
 	}
 
-	return bIsHitting;
+	return CurrentHit.bBlockingHit;
 }
 
 float UInteractor::GetInteractRadius() const
@@ -97,7 +103,12 @@ float UInteractor::GetHoldDistance() const
 	return HoldDistance;
 }
 
-FVector UInteractor::GetInteractLocation() const
+FHitResult UInteractor::GetCurrentHit() const
 {
-	return InteractionLocation;
+	return CurrentHit;
+}
+
+TScriptInterface<IInteractable> UInteractor::GetLastHitInteractable() const
+{
+	return LastHitInteractable;
 }

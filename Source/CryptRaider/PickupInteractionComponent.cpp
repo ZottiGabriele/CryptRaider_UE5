@@ -88,6 +88,10 @@ bool UPickupInteractionComponent::IsInteractable() const
 
 FString UPickupInteractionComponent::GetInteractionPrompt() const
 {
-	return "Pick up";
+	if (Handler != nullptr && Handler->GetGrabbedComponent() == Primitive)
+	{
+		return DropInteractionPrompt;
+	}
+	return PickUpInteractionPrompt;
 }
 
