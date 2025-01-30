@@ -16,8 +16,18 @@ enum class DoorState : uint8
 	Closed,
 	Opening,
 	Opened,
-	Closing,
-	Locked
+	Closing
+};
+
+UENUM(BlueprintType)
+enum class DoorInteraction : uint8
+{
+	Close,
+	Open,
+	Lock,
+	Unlock,
+	SetInteractableTrue,
+	SetInteractableFalse
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -61,10 +71,20 @@ public:
 	void Close();
 
 	UFUNCTION(BlueprintCallable)
+	void Unlock();
+
+	UFUNCTION(BlueprintCallable)
+	void Lock();
+
+	UFUNCTION(BlueprintCallable)
+	void ExecuteInteraction(DoorInteraction Interaction);
+	
+	UFUNCTION(BlueprintCallable)
 	DoorState GetCurrentState() const;
 
 	virtual bool TryInteract(UInteractor& Interactor) override;
 	virtual bool IsInteractable() const override;
+	virtual void SetInteractable(bool InteractionEnabled) override;
 	virtual FString GetInteractionPrompt() const override;
 
 private:
@@ -76,9 +96,15 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Setup")
 	FString LockedInteractionPrompt = "Locked";
+
+	UPROPERTY(EditAnywhere, Category = "Setup")
+	bool bInteractionEnabled = true;
 	
 	UPROPERTY(EditAnywhere, Category = "Setup")
 	DoorState StartingState;
+
+	UPROPERTY(EditAnywhere, Category = "Setup")
+	bool IsLocked;
 	
 	FRotator StartLeftDoorRotation;
 	FRotator StartRightDoorRotation;

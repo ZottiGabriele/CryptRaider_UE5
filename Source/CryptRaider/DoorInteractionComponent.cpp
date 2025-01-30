@@ -81,16 +81,57 @@ void UDoorInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 
 void UDoorInteractionComponent::Open()
 {
-	UE_LOG(LogTemp, Display, TEXT("Opening Door!"));
+	if (IsLocked) return;
+	
+	UE_LOG(LogTemp, Display, TEXT("Opening Door %s"), *GetOwner()->GetName());
 	InteractionTime = 0;
 	CurrentState = DoorState::Opening;
 }
 
 void UDoorInteractionComponent::Close()
 {
-	UE_LOG(LogTemp, Display, TEXT("Closing Door!"));
+	if (IsLocked) return;
+	
+	UE_LOG(LogTemp, Display, TEXT("Closing Door %s"), *GetOwner()->GetName());
 	InteractionTime = 0;
 	CurrentState = DoorState::Closing;
+}
+
+void UDoorInteractionComponent::Unlock()
+{
+	UE_LOG(LogTemp, Display, TEXT("Unlocking Door %s"), *GetOwner()->GetName());
+	IsLocked = false;
+}
+
+void UDoorInteractionComponent::Lock()
+{
+	UE_LOG(LogTemp, Display, TEXT("Locking Door %s"), *GetOwner()->GetName());
+	IsLocked = true;
+}
+
+void UDoorInteractionComponent::ExecuteInteraction(DoorInteraction Interaction)
+{
+	switch (Interaction)
+	{
+		case DoorInteraction::Close:
+			Close();
+			break;
+		case DoorInteraction::Open:
+			Open();
+			break;
+		case DoorInteraction::Lock:
+			Lock();
+			break;
+		case DoorInteraction::Unlock:
+			Unlock();
+			break;
+		case DoorInteraction::SetInteractableTrue:
+			SetInteractable(true);
+			break;
+		case DoorInteraction::SetInteractableFalse:
+			SetInteractable(false);
+			break;
+	}
 }
 
 DoorState UDoorInteractionComponent::GetCurrentState() const
@@ -102,28 +143,37 @@ bool UDoorInteractionComponent::TryInteract(UInteractor& Interactor)
 {
 	switch (CurrentState)
 	{
-	case DoorState::Closed:
-		Open();
-		break;
-	case DoorState::Opened:
-		Close();
-		break;
-	case DoorState::Opening:
-	case DoorState::Closing:
-	case DoorState::Locked:
-		return false;
+		case DoorState::Closed:
+			Open();
+			break;
+		case DoorState::Opened:
+			Close();
+			break;
+		case DoorState::Opening:
+		case DoorState::Closing:
+			return false;
 	}
-
+	
 	return true;
 }
 
 bool UDoorInteractionComponent::IsInteractable() const
 {
-	return CurrentState == DoorState::Opened || CurrentState == DoorState::Closed;
+	return bInteractionEnabled && (CurrentState == DoorState::Opened || CurrentState == DoorState::Closed);
+}
+
+void UDoorInteractionComponent::SetInteractable(const bool InteractionEnabled)
+{
+	bInteractionEnabled = InteractionEnabled;
 }
 
 FString UDoorInteractionComponent::GetInteractionPrompt() const
 {
+	if (IsLocked)
+	{
+		return LockedInteractionPrompt;
+	}
+	
 	if (CurrentState == DoorState::Opened)
 	{
 		return CloseInteractionPrompt;	
@@ -132,11 +182,6 @@ FString UDoorInteractionComponent::GetInteractionPrompt() const
 	if (CurrentState == DoorState::Closed)
 	{
 		return OpenInteractionPrompt;
-	}
-
-	if (CurrentState == DoorState::Locked)
-	{
-		return LockedInteractionPrompt;
 	}
 	
 	return "";

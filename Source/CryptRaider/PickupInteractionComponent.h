@@ -26,20 +26,24 @@ protected:
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
-	UPROPERTY(EditAnywhere)
-	FVector GrabAnchorLocation;
 	
 	virtual bool TryInteract(UInteractor& Interactor) override;
 	virtual bool IsInteractable() const override;
+	virtual void SetInteractable(bool bInteractionEnabled) override;
 	virtual FString GetInteractionPrompt() const override;
 
 private:
+	UPROPERTY(EditAnywhere)
+	FVector GrabAnchorLocation;
+	
 	UPROPERTY(EditAnywhere)
 	FString PickUpInteractionPrompt = "Pick Up";
 
 	UPROPERTY(EditAnywhere)
 	FString DropInteractionPrompt = "Drop";
+
+	UPROPERTY(EditAnywhere)
+	bool bInteractionEnabled = true;
 	
 	UPrimitiveComponent* Primitive;
 	std::map<UStaticMeshComponent*, ECollisionResponse> CollisionMap;

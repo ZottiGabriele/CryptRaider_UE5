@@ -32,7 +32,7 @@ void UPickupInteractionComponent::TickComponent(float DeltaTime, ELevelTick Tick
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (Handler != nullptr && Primitive != nullptr && CachedInteractor != nullptr)
+	if (CachedInteractor != nullptr && Handler != nullptr && Primitive != nullptr)
 	{
 		FVector TargetLocation = CachedInteractor->GetComponentLocation() + CachedInteractor->GetForwardVector() * CachedInteractor->GetHoldDistance();
 		Handler->SetTargetLocationAndRotation(TargetLocation, CachedInteractor->GetComponentRotation());
@@ -60,6 +60,8 @@ bool UPickupInteractionComponent::TryInteract(UInteractor& Interactor)
 				CollisionCache.first->SetCollisionResponseToChannel(ECC_Pawn, CollisionCache.second);
 				CollisionCache.first->UpdateCollisionProfile();
 			}
+
+			CachedInteractor = nullptr;
 			
 			return false;
 		}
@@ -83,7 +85,12 @@ bool UPickupInteractionComponent::TryInteract(UInteractor& Interactor)
 
 bool UPickupInteractionComponent::IsInteractable() const
 {
-	return true;
+	return bInteractionEnabled;
+}
+
+void UPickupInteractionComponent::SetInteractable(const bool InteractionEnabled)
+{
+	bInteractionEnabled = InteractionEnabled;
 }
 
 FString UPickupInteractionComponent::GetInteractionPrompt() const
