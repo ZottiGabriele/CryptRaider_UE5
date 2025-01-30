@@ -27,7 +27,10 @@ class CRYPTRAIDER_API IInteractable
 public:
 	UFUNCTION(BlueprintCallable)
 	virtual FString GetInteractionPrompt() const = 0;
-	
-	virtual bool TryInteract(UInteractor& Interactor) = 0;
+
+	UFUNCTION(BlueprintCallable)
 	virtual bool IsInteractable() const = 0;
+
+	virtual bool TryInteract(UInteractor& Interactor) = 0;
+	virtual void SetInteractable(bool InteractionEnabled) = 0;
 };
