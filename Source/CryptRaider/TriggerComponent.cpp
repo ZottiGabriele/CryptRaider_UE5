@@ -11,6 +11,8 @@ UTriggerComponent::UTriggerComponent()
 void UTriggerComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	bHasEntered = bIgnoreFirstEnter;
 }
 
 void UTriggerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -19,16 +21,16 @@ void UTriggerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 
 	AActor* OverlappingActor = GetValidOverlappingActor();
 	
-	if (!HasEntered && OverlappingActor != nullptr)
+	if (!bHasEntered && OverlappingActor != nullptr)
 	{
 		UE_LOG(LogTemp, Display, TEXT("ENTER!"));
-		HasEntered = true;
+		bHasEntered = true;
 		OnTriggerEnter(OverlappingActor);
 	}
-	else if (HasEntered && OverlappingActor == nullptr)
+	else if (bHasEntered && OverlappingActor == nullptr)
 	{
 		UE_LOG(LogTemp, Display, TEXT("EXIT!"));
-		HasEntered = false;
+		bHasEntered = false;
 		OnTriggerExit();
 	}
 }
@@ -40,9 +42,12 @@ AActor* UTriggerComponent::GetValidOverlappingActor() const
 	
 	for (AActor* Actor : OverlappingActors)
 	{
-		if (Actor->ActorHasTag(FilterTag))
+		for (FName Tag : FilterTags)
 		{
-			return Actor;
+			if (Actor->ActorHasTag(Tag))
+			{
+				return Actor;
+			}
 		}
 	}
 	return nullptr;

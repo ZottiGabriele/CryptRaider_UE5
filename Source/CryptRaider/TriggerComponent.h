@@ -26,9 +26,13 @@ public:
 
 private:
 	UPROPERTY(EditAnywhere)
-	FName FilterTag;
+	TArray<FName> FilterTags;
 
-	bool HasEntered;
+	UPROPERTY(EditAnywhere)
+	bool bIgnoreFirstEnter;
+
+	bool bHasIgnored;
+	bool bHasEntered;
 	
 	AActor* GetValidOverlappingActor() const;
 };
