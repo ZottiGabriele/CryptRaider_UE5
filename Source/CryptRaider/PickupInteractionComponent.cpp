@@ -73,6 +73,11 @@ bool UPickupInteractionComponent::TryInteract(UInteractor& Interactor)
 			CollisionCache.first->UpdateCollisionProfile();
 		}
 
+		if (bSimulatePhysicsOnInteract && !Primitive->IsSimulatingPhysics())
+		{
+			Primitive->SetSimulatePhysics(true);
+		}
+
 		UE_LOG(LogTemp, Display, TEXT("Pick %s up!"), *Primitive -> GetName());
 		FVector GrabPoint = Primitive->GetComponentLocation() + Primitive->GetComponentRotation().RotateVector(GrabAnchorLocation);
 		Handler->GrabComponentAtLocationWithRotation(Primitive, NAME_None, GrabPoint, Interactor.GetComponentRotation());

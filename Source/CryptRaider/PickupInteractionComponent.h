@@ -43,6 +43,9 @@ private:
 	FString DropInteractionPrompt = "Drop";
 
 	UPROPERTY(EditAnywhere)
+	bool bSimulatePhysicsOnInteract = true;
+	
+	UPROPERTY(EditAnywhere)
 	bool bInteractionEnabled = true;
 	
 	UPrimitiveComponent* Primitive;
